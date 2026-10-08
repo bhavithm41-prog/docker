@@ -1,4 +1,4 @@
-pipeline{
+pipeline {
     agent any
 
     environment {
@@ -7,9 +7,9 @@ pipeline{
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/bhavithm41-prog/docker.git'
-
-          }
+                // Specifying 'main' fixes your previous Git error too!
+                git branch: 'main', url: 'https://github.com/bhavithm41-prog/docker.git'
+            }
         }
         stage('Build Docker Image') {
             steps {
@@ -18,17 +18,10 @@ pipeline{
                 }
             }
         }
-        stage('Login to docker hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub_creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                   bat echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                }
-            }
-        }
-
         stage('Push Docker Image') {
             steps {
                 script {
+                    // This block automatically logs into Docker Hub for you safely
                     docker.withRegistry('', 'dockerhub_creds') {
                         docker.image("${DOCKER_IMAGE}:latest").push()
                     }
@@ -37,11 +30,11 @@ pipeline{
         }
     }
 
-    post{
-        success{
+    post {
+        success {
             echo "Docker image pushed successfully!"
         }
-        failure{
+        failure {
             echo "Failed to push Docker image!"
         }
     }
