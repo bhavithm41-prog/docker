@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "bhavith23/docker"
+        DOCKER_IMAGE = "bhavith23/myapp"
     }
 
     stages {
