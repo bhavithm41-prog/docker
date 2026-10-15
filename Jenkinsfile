@@ -15,7 +15,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %DOCKER_IMAGE%:v1 .'
+                bat "C:\Program Files\Docker\Docker\resources\bin\docker.exe" 'docker build -t %DOCKER_IMAGE%:v1 .'
             }
         }
 
