@@ -4,38 +4,49 @@ pipeline {
     environment {
         DOCKER_IMAGE = "bhavith23/abc"
     }
+
     stages {
         stage('Clone Repository') {
             steps {
-                // Specifying 'main' fixes your previous Git error too!
-                git branch: 'main', url: 'https://github.com/bhavithm41-prog/docker.git'
+                git branch: 'main',
+                    url: 'https://github.com/bhavithm41-prog/docker.git'
             }
         }
+
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:latest")
+                bat 'docker build -t %DOCKER_IMAGE%:latest .'
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([string(
+                    credentialsId: 'dockerhub-PAT',
+                    variable: 'DOCKER_PAT'
+                )]) {
+                    bat '''
+                    @echo off
+                    echo %DOCKER_PAT%|docker login -u akshatha29 --password-stdin
+                   if errorlevel 1 exit /b 1
+                    '''
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
-                script {
-                    // This block automatically logs into Docker Hub for you safely
-                    docker.withRegistry('', 'dockerhub_creds') {
-                        docker.image("${DOCKER_IMAGE}:latest").push()
-                    }
-                }
+                bat 'docker push %DOCKER_IMAGE%:latest'
             }
         }
     }
 
     post {
         success {
-            echo "Docker image pushed successfully!"
+            echo 'Docker image built and pushed successfully.'
         }
         failure {
-            echo "Failed to push Docker image!"
+            echo 'Pipeline failed. Check Console Output.'
         }
     }
 }
